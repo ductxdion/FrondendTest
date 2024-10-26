@@ -8,6 +8,7 @@ const MatrixInput = ({ onSubmit }) => {
     const [matrix, setMatrix] = useState([]);
     const [errors, setErrors] = useState({ n: '', m: '', p: '' });
     const [isValid, setIsValid] = useState(false);
+    const [selectedCell, setSelectedCell] = useState(null);
 
     useEffect(() => {
         const newMatrix = Array.from({ length: n }, () => Array(m).fill(0));
@@ -48,13 +49,18 @@ const MatrixInput = ({ onSubmit }) => {
         setMatrix(newMatrix);
     };
 
+    const handleDoubleClick = (i, j) => {
+        setSelectedCell(`(${i}, ${j})`);
+    };
+
     const generateMatrix = () => {
         const newMatrix = Array.from({ length: n }, () => Array(m).fill(0));
-        const nums = Array(p - 1).fill().flatMap((_, i) => Array(1).fill(i + 1));
-        nums.push(p);
-        while (nums.length < n * m) {
-            nums.push(Math.floor(Math.random() * p) + 1);
+        let nums = Array(p - 1).fill().flatMap((_, i) => Array(1).fill(i + 1));
+
+        while (nums.length < n * m - 1) {
+            nums.push(Math.floor(Math.random() * (p - 1)) + 1);
         }
+        nums.push(p); // Ensure one cell is p
         nums.sort(() => Math.random() - 0.5);
         for (let i = 0; i < n; i++) {
             for (let j = 0; j < m; j++) {
@@ -120,7 +126,11 @@ const MatrixInput = ({ onSubmit }) => {
                                         type="number"
                                         value={matrix[i][j]}
                                         onChange={e => handleMatrixChange(i, j, Number(e.target.value))}
-                                        sx={{ width: '60px' }}
+                                        onDoubleClick={() => handleDoubleClick(i, j)}
+                                        sx={{
+                                            width: '60px',
+                                            backgroundColor: matrix[i][j] === p && matrix[i][j] !== 0 ? 'yellow' : 'inherit'
+                                        }}
                                         InputProps={{ inputProps: { style: { appearance: 'textfield' } } }}
                                     />
                                 </Grid>
@@ -135,6 +145,12 @@ const MatrixInput = ({ onSubmit }) => {
                         </Button>
                     </Grid>
                 )}
+                <Grid item xs={12}>
+                    <Typography variant="h6">The Road to Treasure</Typography>
+                    {selectedCell && (
+                        <Typography variant="body1">Selected Cell: {selectedCell}</Typography>
+                    )}
+                </Grid>
             </Grid>
         </Box>
     );
