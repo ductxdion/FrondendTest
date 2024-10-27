@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, Grid, Box, Typography } from '@mui/material';
 
-const MatrixInput = ({ onSubmit, onCheck }) => {
+const MatrixInput = () => {
     const [n, setN] = useState(0);
     const [m, setM] = useState(0);
     const [p, setP] = useState(0);
     const [matrix, setMatrix] = useState([]);
     const [errors, setErrors] = useState({ n: '', m: '', p: '' });
     const [isValid, setIsValid] = useState(false);
-    const [selectedCells, setSelectedCells] = useState([]);
+    const [selectedCells, setSelectedCells] = useState([{ i: 0, j: 0 }]); // Khởi tạo với tọa độ [0,0]
 
     useEffect(() => {
         const newMatrix = Array.from({ length: n }, () => Array(m).fill(0));
@@ -19,7 +19,6 @@ const MatrixInput = ({ onSubmit, onCheck }) => {
     const validateInputs = () => {
         let valid = true;
         const newErrors = { n: '', m: '', p: '' };
-
         if (n < 1 || n > 500) {
             newErrors.n = '1 <= n <= 500';
             valid = false;
@@ -32,17 +31,29 @@ const MatrixInput = ({ onSubmit, onCheck }) => {
             newErrors.p = '1 <= p <= n * m';
             valid = false;
         }
-
         setErrors(newErrors);
         setIsValid(valid);
     };
 
     const handleSubmit = () => {
-        onSubmit(n, m, p, matrix);
+        // onSubmit(n, m, p, matrix);
     };
 
-    const handleCheck = async () => {
-        onCheck(n, m, p, matrix, selectedCells);
+    const handleCheck = () => {
+        fetch('https://localhost:7188/api/Matrix/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ n, m, p, matrix, selectedCells }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert(data.message);
+            })
+            .catch(error => console.error('Error:', error));
+        ;
     };
 
     const handleMatrixChange = (i, j, value) => {
@@ -53,13 +64,14 @@ const MatrixInput = ({ onSubmit, onCheck }) => {
 
     const handleDoubleClick = (i, j) => {
         const cell = { i, j };
-        if (!selectedCells.some(selected => selected.i === i && selected.j === j)) {
-            setSelectedCells([...selectedCells, cell]);
-        }
+        setSelectedCells([...selectedCells, cell]);
+        // if (!selectedCells.some(selected => selected.i === i && selected.j === j)) {
+        //     setSelectedCells([...selectedCells, cell]);
+        // }
     };
 
     const resetSelection = () => {
-        setSelectedCells([]);
+        setSelectedCells([{ i: 0, j: 0 }]); // Đặt lại với tọa độ [0,0]
     };
 
     const generateMatrix = () => {
@@ -70,13 +82,11 @@ const MatrixInput = ({ onSubmit, onCheck }) => {
         }
         nums.push(p); // Ensure one cell is p
         nums.sort(() => Math.random() - 0.5);
-
         for (let i = 0; i < n; i++) {
             for (let j = 0; j < m; j++) {
                 newMatrix[i][j] = nums[i * m + j];
             }
         }
-
         setMatrix(newMatrix);
     };
 
