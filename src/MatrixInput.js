@@ -41,12 +41,8 @@ const MatrixInput = ({ onSubmit, onCheck }) => {
         onSubmit(n, m, p, matrix);
     };
 
-    const handleCheck = () => {
-        const selectedCellsData = selectedCells.map(cell => {
-            const [i, j] = cell.slice(1, -1).split(', ').map(Number);
-            return matrix[i][j];
-        });
-        onCheck(n, m, p, matrix, selectedCellsData);
+    const handleCheck = async () => {
+        onCheck(n, m, p, matrix, selectedCells);
     };
 
     const handleMatrixChange = (i, j, value) => {
@@ -56,8 +52,8 @@ const MatrixInput = ({ onSubmit, onCheck }) => {
     };
 
     const handleDoubleClick = (i, j) => {
-        const cell = `(${i}, ${j})`;
-        if (!selectedCells.includes(cell)) {
+        const cell = { i, j };
+        if (!selectedCells.some(selected => selected.i === i && selected.j === j)) {
             setSelectedCells([...selectedCells, cell]);
         }
     };
@@ -82,6 +78,16 @@ const MatrixInput = ({ onSubmit, onCheck }) => {
         }
 
         setMatrix(newMatrix);
+    };
+
+    const getCellStyle = (i, j) => {
+        if (i === 0 && j === 0) {
+            return { backgroundColor: 'green' };
+        }
+        if (matrix[i][j] === p) {
+            return { backgroundColor: 'yellow' };
+        }
+        return {};
     };
 
     return (
@@ -143,7 +149,7 @@ const MatrixInput = ({ onSubmit, onCheck }) => {
                                         onDoubleClick={() => handleDoubleClick(i, j)}
                                         sx={{
                                             width: '60px',
-                                            backgroundColor: selectedCells.includes(`(${i}, ${j})`) ? 'red' : 'inherit'
+                                            ...getCellStyle(i, j)
                                         }}
                                         InputProps={{ inputProps: { style: { appearance: 'textfield' } } }}
                                     />
@@ -152,6 +158,17 @@ const MatrixInput = ({ onSubmit, onCheck }) => {
                         </Grid>
                     </Grid>
                 ))}
+                <Grid item xs={12}>
+                    <Typography variant="h6">The Road to Treasure</Typography>
+                    {selectedCells.length > 0 && (
+                        <Typography variant="body1">Selected Cells: {selectedCells.map(cell => `(${cell.i}, ${cell.j})`).join(', ')}</Typography>
+                    )}
+                </Grid>
+                <Grid item xs={12}>
+                    <Button variant="contained" color="secondary" onClick={resetSelection}>
+                        Reset Selection
+                    </Button>
+                </Grid>
                 {isValid && (
                     <Grid item xs={12}>
                         <Button variant="contained" color="primary" onClick={handleSubmit}>
@@ -162,17 +179,6 @@ const MatrixInput = ({ onSubmit, onCheck }) => {
                         </Button>
                     </Grid>
                 )}
-                <Grid item xs={12}>
-                    <Typography variant="h6">The Road to Treasure</Typography>
-                    {selectedCells.length > 0 && (
-                        <Typography variant="body1">Selected Cells: {selectedCells.join(', ')}</Typography>
-                    )}
-                </Grid>
-                <Grid item xs={12}>
-                    <Button variant="contained" color="secondary" onClick={resetSelection}>
-                        Reset Selection
-                    </Button>
-                </Grid>
             </Grid>
         </Box>
     );

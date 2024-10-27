@@ -17,16 +17,18 @@ const App = () => {
       .catch(error => console.error('Error:', error));
   };
 
-  const handleCheck = async (n, m, p, matrix, selectedCellsData) => {
-    const response = await fetch('https://localhost:7188/api/Matrix/check', {
+  const handleCheck = (n, m, p, matrix, selectedCellsData) => {
+    fetch('https://localhost:7188/api/Matrix/check', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ n, m, p, matrix, selectedCellsData }),
-    });
-    const result = await response.json();
-    console.log('Check Result:', result);
+    })
+      .then(response => response.json())
+      .then(data => console.log('Success:', data))
+      .catch(error => console.error('Error:', error));
+    ;
   };
 
   return (
