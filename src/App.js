@@ -1,27 +1,28 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { AppBar, Toolbar, Button } from '@mui/material';
 import MatrixInput from './MatrixInput';
-import { Container } from '@mui/material';
+import MatrixList from './MatrixList';
 
 const App = () => {
-  const handleSubmit = (n, m, matrix) => {
-    // Send data to backend
-    fetch('http://localhost:5000/api/treasurehunt', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ n, m, matrix }),
-    })
-      .then(response => response.json())
-      .then(data => console.log('Success:', data))
-      .catch(error => console.error('Error:', error));
-  };
-
   return (
-    <Container>
-      <h1>Treasure Hunt</h1>
-      <MatrixInput />
-    </Container>
+    <Router>
+      <AppBar position="static">
+        <Toolbar>
+          <Button color="inherit" component={Link} to="/input">
+            Matrix Input
+          </Button>
+          <Button color="inherit" component={Link} to="/list">
+            Matrix List
+          </Button>
+        </Toolbar>
+      </AppBar>
+      <Routes>
+        <Route path="/input" element={<MatrixInput />} />
+        <Route path="/list" element={<MatrixList />} />
+        <Route path="/" element={<MatrixInput />} />
+      </Routes>
+    </Router>
   );
 };
 

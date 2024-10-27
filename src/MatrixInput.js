@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Grid, Box, Typography } from '@mui/material';
+import { TextField, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Grid, Box, Typography, Snackbar, Alert } from '@mui/material';
 
 const MatrixInput = () => {
     const [n, setN] = useState(0);
@@ -9,6 +9,11 @@ const MatrixInput = () => {
     const [errors, setErrors] = useState({ n: '', m: '', p: '' });
     const [isValid, setIsValid] = useState(false);
     const [selectedCells, setSelectedCells] = useState([{ i: 0, j: 0 }]); // Khởi tạo với tọa độ [0,0]
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState('');
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [matrixName, setMatrixName] = useState('');
 
     useEffect(() => {
         const newMatrix = Array.from({ length: n }, () => Array(m).fill(0));
@@ -35,8 +40,34 @@ const MatrixInput = () => {
         setIsValid(valid);
     };
 
-    const handleSubmit = () => {
-        // onSubmit(n, m, p, matrix);
+    const handleSaveMatrixClick = () => {
+        setDialogOpen(true);
+    };
+
+    const handleDialogClose = () => {
+        setDialogOpen(false);
+    };
+
+    const handleDialogOk = () => {
+        fetch('https://localhost:7188/api/Matrix/insert', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ n, m, p, matrixName, matrix, selectedCells }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                setSnackbarMessage('Matrix saved successfully');
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+            })
+            .catch(error => {
+                setSnackbarMessage('Failed to save matrix');
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+            });
+        setDialogOpen(false);
     };
 
     const handleCheck = () => {
@@ -50,10 +81,21 @@ const MatrixInput = () => {
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
-                alert(data.message);
+                if (data.message === 'OK') {
+                    setSnackbarMessage('Success: The road is the shortest');
+                    setSnackbarSeverity('success');
+                } else {
+                    setSnackbarMessage('Fail: Its not correct');
+                    setSnackbarSeverity('error');
+                }
+                setSnackbarOpen(true);
             })
-            .catch(error => console.error('Error:', error));
-        ;
+            .catch(error => {
+                console.error('Error:', error);
+                setSnackbarMessage('An error occurred');
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+            });
     };
 
     const handleMatrixChange = (i, j, value) => {
@@ -65,9 +107,6 @@ const MatrixInput = () => {
     const handleDoubleClick = (i, j) => {
         const cell = { i, j };
         setSelectedCells([...selectedCells, cell]);
-        // if (!selectedCells.some(selected => selected.i === i && selected.j === j)) {
-        //     setSelectedCells([...selectedCells, cell]);
-        // }
     };
 
     const resetSelection = () => {
@@ -98,6 +137,10 @@ const MatrixInput = () => {
             return { backgroundColor: 'yellow' };
         }
         return {};
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbarOpen(false);
     };
 
     return (
@@ -168,28 +211,65 @@ const MatrixInput = () => {
                         </Grid>
                     </Grid>
                 ))}
-                <Grid item xs={12}>
-                    <Typography variant="h6">The Road to Treasure</Typography>
-                    {selectedCells.length > 0 && (
-                        <Typography variant="body1">Selected Cells: {selectedCells.map(cell => `(${cell.i}, ${cell.j})`).join(', ')}</Typography>
-                    )}
-                </Grid>
-                <Grid item xs={12}>
-                    <Button variant="contained" color="secondary" onClick={resetSelection}>
-                        Reset Selection
-                    </Button>
-                </Grid>
+
                 {isValid && (
-                    <Grid item xs={12}>
-                        <Button variant="contained" color="primary" onClick={handleSubmit}>
-                            Submit
-                        </Button>
-                        <Button variant="contained" color="primary" onClick={handleCheck}>
-                            Check
-                        </Button>
-                    </Grid>
+                    <>
+                        <Grid item xs={12}>
+                            <Typography variant="h6">The Road to Treasure</Typography>
+                            {selectedCells.length > 0 && (
+                                <Typography variant="body1">Steps: {selectedCells.map(cell => `(${cell.i}, ${cell.j})`).join(', ')}</Typography>
+                            )}
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Button variant="contained" color="secondary" onClick={resetSelection} sx={{ mr: 2 }}>
+                                Reset Selection
+                            </Button>
+                            <Button variant="contained" color="primary" onClick={handleCheck}>
+                                Check
+                            </Button>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Button variant="contained" color="primary" onClick={handleSaveMatrixClick}>
+                                Save Matrix
+                            </Button>
+                            <Dialog open={dialogOpen} onClose={handleDialogClose}>
+                                <DialogTitle>Enter Matrix Name</DialogTitle>
+                                <DialogContent>
+                                    <DialogContentText>
+                                        Please enter a name for the matrix.
+                                    </DialogContentText>
+                                    <TextField
+                                        autoFocus
+                                        margin="dense"
+                                        label="Matrix Name"
+                                        fullWidth
+                                        value={matrixName}
+                                        onChange={(e) => setMatrixName(e.target.value)}
+                                    />
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button onClick={handleDialogClose} color="primary">
+                                        Cancel
+                                    </Button>
+                                    <Button onClick={handleDialogOk} color="primary">
+                                        OK
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
+                        </Grid>
+                    </>
                 )}
             </Grid>
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };
