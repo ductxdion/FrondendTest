@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { TextField, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Grid, Box, Typography, Snackbar, Alert } from '@mui/material';
+import config from './config'; // Import the config file
 
 const MatrixInput = () => {
     const location = useLocation();
@@ -61,7 +62,7 @@ const MatrixInput = () => {
     };
 
     const handleDialogOk = () => {
-        fetch('https://localhost:7188/api/Matrix/insert', {
+        fetch(`${config.baseURL}/insert`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -83,7 +84,7 @@ const MatrixInput = () => {
     };
 
     const handleCheck = () => {
-        fetch('https://localhost:7188/api/Matrix/check', {
+        fetch(`${config.baseURL}/check`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

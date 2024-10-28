@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Snackbar, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import config from './config'; // Import the config file
 
 const MatrixList = () => {
     const [matrices, setMatrices] = useState([]);
@@ -10,7 +11,7 @@ const MatrixList = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch('https://localhost:7188/api/Matrix/list')
+        fetch(`${config.baseURL}/list`)
             .then(response => response.json())
             .then(data => setMatrices(data))
             .catch(error => console.error('Error fetching matrix list:', error));
@@ -21,7 +22,7 @@ const MatrixList = () => {
     };
 
     const handleDelete = (id) => {
-        fetch(`https://localhost:7188/api/Matrix/delete/${id}`, {
+        fetch(`${config.baseURL}/delete/${id}`, {
             method: 'DELETE',
         })
             .then(response => {
