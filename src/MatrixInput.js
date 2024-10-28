@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { TextField, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Grid, Box, Typography, Snackbar, Alert } from '@mui/material';
 
 const MatrixInput = () => {
+    const location = useLocation();
     const [n, setN] = useState(0);
     const [m, setM] = useState(0);
     const [p, setP] = useState(0);
@@ -15,13 +17,7 @@ const MatrixInput = () => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [matrixName, setMatrixName] = useState('');
 
-    useEffect(() => {
-        const newMatrix = Array.from({ length: n }, () => Array(m).fill(0));
-        setMatrix(newMatrix);
-        validateInputs();
-    }, [n, m, p]);
-
-    const validateInputs = () => {
+    const validateInputs = useCallback(() => {
         let valid = true;
         const newErrors = { n: '', m: '', p: '' };
         if (n < 1 || n > 500) {
@@ -38,7 +34,23 @@ const MatrixInput = () => {
         }
         setErrors(newErrors);
         setIsValid(valid);
-    };
+    }, [n, m, p]);
+
+    useEffect(() => {
+        // setMatrix([]); // Reset matrix
+        if (location.state?.matrix) {
+            const { matrixName, m, n, p, matrixData } = location.state.matrix;
+            setMatrixName(matrixName);
+            setM(m);
+            setN(n);
+            setP(p);
+            setMatrix(JSON.parse(matrixData));
+        } else {
+            const newMatrix = Array.from({ length: n }, () => Array(m).fill(0));
+            setMatrix(newMatrix);
+        }
+        validateInputs();
+    }, [n, m, p, validateInputs, location.state]);
 
     const handleSaveMatrixClick = () => {
         setDialogOpen(true);
@@ -189,7 +201,7 @@ const MatrixInput = () => {
                         </Button>
                     </Grid>
                 )}
-                {Array.from({ length: n }).map((_, i) => (
+                {matrix.length > 0 && ((Array.from({ length: matrix.length }).map((_, i) => (
                     <Grid item xs={12} key={i}>
                         <Grid container spacing={2}>
                             {Array.from({ length: m }).map((_, j) => (
@@ -210,7 +222,7 @@ const MatrixInput = () => {
                             ))}
                         </Grid>
                     </Grid>
-                ))}
+                ))))}
 
                 {isValid && (
                     <>
