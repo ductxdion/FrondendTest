@@ -11,7 +11,7 @@ const MatrixInput = () => {
     const [matrix, setMatrix] = useState([]);
     const [errors, setErrors] = useState({ n: '', m: '', p: '' });
     const [isValid, setIsValid] = useState(false);
-    const [selectedCells, setSelectedCells] = useState([{ i: 0, j: 0 }]); // Khởi tạo với tọa độ [0,0]
+    const [selectedCells, setSelectedCells] = useState([{ i: 0, j: 0 }]);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('');
@@ -38,7 +38,6 @@ const MatrixInput = () => {
     }, [n, m, p]);
 
     useEffect(() => {
-        // setMatrix([]); // Reset matrix
         if (location.state?.matrix) {
             const { matrixName, m, n, p, matrixData } = location.state.matrix;
             setMatrixName(matrixName);
@@ -126,7 +125,7 @@ const MatrixInput = () => {
     };
 
     const resetSelection = () => {
-        setSelectedCells([{ i: 0, j: 0 }]); // Đặt lại với tọa độ [0,0]
+        setSelectedCells([{ i: 0, j: 0 }]);
     };
 
     const generateMatrix = () => {
@@ -158,6 +157,9 @@ const MatrixInput = () => {
     const handleCloseSnackbar = () => {
         setSnackbarOpen(false);
     };
+    const handleFocus = (event) => {
+        event.target.select();
+    };
 
     return (
         <Box sx={{ p: 2 }}>
@@ -168,6 +170,7 @@ const MatrixInput = () => {
                         type="number"
                         value={n}
                         onChange={e => setN(Number(e.target.value))}
+                        onFocus={handleFocus}
                         fullWidth
                         error={!!errors.n}
                         helperText={errors.n}
@@ -180,6 +183,7 @@ const MatrixInput = () => {
                         type="number"
                         value={m}
                         onChange={e => setM(Number(e.target.value))}
+                        onFocus={handleFocus}
                         fullWidth
                         error={!!errors.m}
                         helperText={errors.m}
@@ -192,6 +196,7 @@ const MatrixInput = () => {
                         type="number"
                         value={p}
                         onChange={e => setP(Number(e.target.value))}
+                        onFocus={handleFocus}
                         fullWidth
                         error={!!errors.p}
                         helperText={errors.p}

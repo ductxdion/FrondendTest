@@ -9,7 +9,7 @@ const App = () => {
     <Router>
       <AppBar position="static">
         <Toolbar>
-          <Button color="inherit" component={Link} to="/input">
+          <Button color="inherit" component={Link} to="/">
             Matrix Input
           </Button>
           <Button color="inherit" component={Link} to="/list">
