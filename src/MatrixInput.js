@@ -69,11 +69,14 @@ const MatrixInput = () => {
             },
             body: JSON.stringify({ n, m, p, matrixName, matrix, selectedCells }),
         })
-            .then(response => response.json())
-            .then(data => {
-                setSnackbarMessage('Matrix saved successfully');
-                setSnackbarSeverity('success');
-                setSnackbarOpen(true);
+            .then(response => {
+                if (response.ok) {
+                    setSnackbarMessage('Matrix saved successfully');
+                    setSnackbarSeverity('success');
+                    setSnackbarOpen(true);
+                } else {
+                    throw new Error('Failed to delete matrix');
+                }
             })
             .catch(error => {
                 setSnackbarMessage('Failed to save matrix');
@@ -95,7 +98,7 @@ const MatrixInput = () => {
             .then(data => {
                 console.log('Success:', data);
                 if (data.message === 'OK') {
-                    setSnackbarMessage('Success: The road is the shortest');
+                    setSnackbarMessage('Success: The road is the shortest. Fuel used is: ' + data.fuelUsed);
                     setSnackbarSeverity('success');
                 } else {
                     setSnackbarMessage('Fail: Its not correct');
